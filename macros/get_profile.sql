@@ -90,14 +90,22 @@
           {% if "is_unique" not in exclude_measures -%}
             count(distinct {{ adapter.quote(column_name) }}) = count(*) as is_unique,
           {%- endif %}
-          {% if "min" not in exclude_measures and '_id' not in column_name | lower -%}
-            {% if dbt_profiler.is_numeric_dtype(data_type) or dbt_profiler.is_date_or_time_dtype(data_type) %}cast(min({{ adapter.quote(column_name) }}) as {{ dbt_profiler.type_string() }}){% else %}null{% endif %} as min,
+          {% if "min" not in exclude_measures -%}
+            {% if '_id' in column_name | lower %}
+                null
+            {% else %}
+                {% if dbt_profiler.is_numeric_dtype(data_type) or dbt_profiler.is_date_or_time_dtype(data_type) %}cast(min({{ adapter.quote(column_name) }}) as {{ dbt_profiler.type_string() }}){% else %}null{% endif %}
+            {% endif %} as min,
           {%- endif %}
-          {% if "max" not in exclude_measures and '_id' not in column_name | lower -%}
-            {% if dbt_profiler.is_numeric_dtype(data_type) or dbt_profiler.is_date_or_time_dtype(data_type) %}cast(max({{ adapter.quote(column_name) }}) as {{ dbt_profiler.type_string() }}){% else %}null{% endif %} as max,
+          {% if "max" not in exclude_measures -%}
+            {% if '_id' in column_name | lower %}
+                null as max
+            {% else %}
+                {% if dbt_profiler.is_numeric_dtype(data_type) or dbt_profiler.is_date_or_time_dtype(data_type) %}cast(max({{ adapter.quote(column_name) }}) as {{ dbt_profiler.type_string() }}){% else %}null{% endif %}
+            {% endif %} as max,
           {%- endif %}
-          {% if "avg" not in exclude_measures and '_id' not in column_name | lower -%}
-            {% if dbt_profiler.is_numeric_dtype(data_type) %}
+          {% if "avg" not in exclude_measures -%}
+            {% if dbt_profiler.is_numeric_dtype(data_type) and '_id' not in column_name | lower %}
                 round(avg({{ adapter.quote(column_name) }}), 4)
             {% elif dbt_profiler.is_logical_dtype(data_type) %}
                 round(avg(case when {{ adapter.quote(column_name) }} then 1 else 0 end), 4)
@@ -105,8 +113,8 @@
                 cast(null as numeric)
             {% endif %} as avg,
           {%- endif %}
-          {% if "sum" not in exclude_measures and '_id' not in column_name | lower -%}
-            {% if dbt_profiler.is_numeric_dtype(data_type) %}
+          {% if "sum" not in exclude_measures -%}
+            {% if dbt_profiler.is_numeric_dtype(data_type) and '_id' not in column_name | lower %}
                 round(sum({{ adapter.quote(column_name) }}), 4)
             {% elif dbt_profiler.is_logical_dtype(data_type) %}
                 round(sum(case when {{ adapter.quote(column_name) }} then 1 else 0 end), 4)
@@ -114,11 +122,19 @@
                 cast(null as numeric)
             {% endif %} as sum,
           {%- endif %}
-          {% if "std_dev_population" not in exclude_measures and '_id' not in column_name | lower -%}
-            {% if dbt_profiler.is_numeric_dtype(data_type) %}round(stddev_pop({{ adapter.quote(column_name) }}), 4){% else %}cast(null as numeric){% endif %} as std_dev_population,
+          {% if "std_dev_population" not in exclude_measures -%}
+            {% if '_id' in column_name | lower %}
+                null
+            {% else %}
+                {% if dbt_profiler.is_numeric_dtype(data_type) %}round(stddev_pop({{ adapter.quote(column_name) }}), 4){% else %}cast(null as numeric){% endif %}
+            {% endif %} as std_dev_population,
           {%- endif %}
-          {% if "std_dev_sample" not in exclude_measures  and '_id' not in column_name | lower-%}
-            {% if dbt_profiler.is_numeric_dtype(data_type)  %}round(stddev_samp({{ adapter.quote(column_name) }}), 4){% else %}cast(null as numeric){% endif %} as std_dev_sample,
+          {% if "std_dev_sample" not in exclude_measures -%}
+            {% if '_id' in column_name | lower %}
+                null
+            {% else %}
+                {% if dbt_profiler.is_numeric_dtype(data_type)  %}round(stddev_samp({{ adapter.quote(column_name) }}), 4){% else %}cast(null as numeric){% endif %}
+            {% endif %} as std_dev_sample,
           {%- endif %}
           cast(current_timestamp as {{ dbt_profiler.type_string() }}) as profiled_at,
           {{ loop.index }} as _column_position
