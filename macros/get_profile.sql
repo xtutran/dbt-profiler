@@ -99,7 +99,7 @@
           {%- endif %}
           {% if "max" not in exclude_measures -%}
             {% if '_id' in column_name | lower %}
-                null as max
+                null
             {% else %}
                 {% if dbt_profiler.is_numeric_dtype(data_type) or dbt_profiler.is_date_or_time_dtype(data_type) %}cast(max({{ adapter.quote(column_name) }}) as {{ dbt_profiler.type_string() }}){% else %}null{% endif %}
             {% endif %} as max,
