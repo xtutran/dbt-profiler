@@ -19,6 +19,7 @@
   "min",
   "max",
   "avg",
+  "sum",
   "std_dev_population",
   "std_dev_sample"
 ] -%}
@@ -103,6 +104,15 @@
             {% else %}
                 cast(null as numeric)
             {% endif %} as avg,
+          {%- endif %}
+          {% if "sum" not in exclude_measures -%}
+            {% if dbt_profiler.is_numeric_dtype(data_type) %}
+                sum({{ adapter.quote(column_name) }})
+            {% elif dbt_profiler.is_logical_dtype(data_type) %}
+                sum(case when {{ adapter.quote(column_name) }} then 1 else 0 end)
+            {% else %}
+                cast(null as numeric)
+            {% endif %} as sum,
           {%- endif %}
           {% if "std_dev_population" not in exclude_measures -%}
             {% if dbt_profiler.is_numeric_dtype(data_type) %}stddev_pop({{ adapter.quote(column_name) }}){% else %}cast(null as numeric){% endif %} as std_dev_population,
