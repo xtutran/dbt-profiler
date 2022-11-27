@@ -98,18 +98,18 @@
           {%- endif %}
           {% if "avg" not in exclude_measures -%}
             {% if dbt_profiler.is_numeric_dtype(data_type) %}
-                avg({{ adapter.quote(column_name) }})
+                round(avg({{ adapter.quote(column_name) }}), 4)
             {% elif dbt_profiler.is_logical_dtype(data_type) %}
-                avg(case when {{ adapter.quote(column_name) }} then 1 else 0 end)
+                round(avg(case when {{ adapter.quote(column_name) }} then 1 else 0 end), 4)
             {% else %}
                 cast(null as numeric)
             {% endif %} as avg,
           {%- endif %}
           {% if "sum" not in exclude_measures -%}
             {% if dbt_profiler.is_numeric_dtype(data_type) %}
-                sum({{ adapter.quote(column_name) }})
+                round(sum({{ adapter.quote(column_name) }}), 4)
             {% elif dbt_profiler.is_logical_dtype(data_type) %}
-                sum(case when {{ adapter.quote(column_name) }} then 1 else 0 end)
+                round(sum(case when {{ adapter.quote(column_name) }} then 1 else 0 end), 4)
             {% else %}
                 cast(null as numeric)
             {% endif %} as sum,
