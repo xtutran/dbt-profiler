@@ -1,10 +1,10 @@
-{% macro get_profile(relation, exclude_measures=[], include_columns=[], exclude_columns=[], where_clause=none, group_by=none) %}
-  {{ return(adapter.dispatch("get_profile", macro_namespace="dbt_profiler")(relation, exclude_measures, include_columns, exclude_columns, where_clause, group_by)) }}
+{% macro get_profile(relation, exclude_measures=[], include_columns=[], exclude_columns=[], where_clause=none, group_by=none, rounding=4) %}
+  {{ return(adapter.dispatch("get_profile", macro_namespace="dbt_profiler")(relation, exclude_measures, include_columns, exclude_columns, where_clause, group_by, rounding=4)) }}
 {% endmacro %}
 
 
 
-{% macro default__get_profile(relation, exclude_measures=[], include_columns=[], exclude_columns=[], where_clause=none, group_by=none) %}
+{% macro default__get_profile(relation, exclude_measures=[], include_columns=[], exclude_columns=[], where_clause=none, group_by=none, rounding=4) %}
 
 {%- if include_columns and exclude_columns -%}
     {{ exceptions.raise_compiler_error("Both include_columns and exclude_columns arguments were provided to the `get_profile` macro. Only one is allowed.") }}
@@ -106,18 +106,18 @@
           {%- endif %}
           {% if "avg" not in exclude_measures -%}
             {% if dbt_profiler.is_numeric_dtype(data_type) and '_id' not in column_name | lower %}
-                round(avg({{ adapter.quote(column_name) }}), 4)
+                round(avg({{ adapter.quote(column_name) }}), {{ rounding }})
             {% elif dbt_profiler.is_logical_dtype(data_type) %}
-                round(avg(case when {{ adapter.quote(column_name) }} then 1 else 0 end), 4)
+                round(avg(case when {{ adapter.quote(column_name) }} then 1 else 0 end), {{ rounding }})
             {% else %}
                 cast(null as numeric)
             {% endif %} as avg,
           {%- endif %}
           {% if "sum" not in exclude_measures -%}
             {% if dbt_profiler.is_numeric_dtype(data_type) and '_id' not in column_name | lower %}
-                round(sum({{ adapter.quote(column_name) }}), 4)
+                round(sum({{ adapter.quote(column_name) }}), {{ rounding }})
             {% elif dbt_profiler.is_logical_dtype(data_type) %}
-                round(sum(case when {{ adapter.quote(column_name) }} then 1 else 0 end), 4)
+                round(sum(case when {{ adapter.quote(column_name) }} then 1 else 0 end), {{ rounding }})
             {% else %}
                 cast(null as numeric)
             {% endif %} as sum,
@@ -126,14 +126,14 @@
             {% if '_id' in column_name | lower %}
                 null
             {% else %}
-                {% if dbt_profiler.is_numeric_dtype(data_type) %}round(stddev_pop({{ adapter.quote(column_name) }}), 4){% else %}cast(null as numeric){% endif %}
+                {% if dbt_profiler.is_numeric_dtype(data_type) %}round(stddev_pop({{ adapter.quote(column_name) }}), {{ rounding }}){% else %}cast(null as numeric){% endif %}
             {% endif %} as std_dev_population,
           {%- endif %}
           {% if "std_dev_sample" not in exclude_measures -%}
             {% if '_id' in column_name | lower %}
                 null
             {% else %}
-                {% if dbt_profiler.is_numeric_dtype(data_type)  %}round(stddev_samp({{ adapter.quote(column_name) }}), 4){% else %}cast(null as numeric){% endif %}
+                {% if dbt_profiler.is_numeric_dtype(data_type)  %}round(stddev_samp({{ adapter.quote(column_name) }}), {{ rounding }}){% else %}cast(null as numeric){% endif %}
             {% endif %} as std_dev_sample,
           {%- endif %}
           cast(current_timestamp as {{ dbt_profiler.type_string() }}) as profiled_at,
