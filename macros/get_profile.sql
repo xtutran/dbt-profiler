@@ -1,5 +1,5 @@
 {% macro get_profile(relation, exclude_measures=[], include_columns=[], exclude_columns=[], where_clause=none, group_by=none, rounding=4) %}
-  {{ return(adapter.dispatch("get_profile", macro_namespace="dbt_profiler")(relation, exclude_measures, include_columns, exclude_columns, where_clause, group_by, rounding=4)) }}
+  {{ return(adapter.dispatch("get_profile", macro_namespace="dbt_profiler")(relation, exclude_measures, include_columns, exclude_columns, where_clause, group_by, rounding)) }}
 {% endmacro %}
 
 

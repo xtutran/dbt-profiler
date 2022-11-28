@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: profile_rounding_number
+
+    columns:
+      - name: avg
+        tests:
+          - dbt_expectations.expect_column_to_exist
+
+    tests:
+      - dbt_expectations.expect_multicolumn_sum_to_equal:
+          column_list: [ "avg" ]
+          sum_total: 1.67
+          row_condition: "column_name = 'numeric_nullable'"
